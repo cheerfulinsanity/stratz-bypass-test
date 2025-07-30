@@ -1,58 +1,56 @@
-# stratz_test.py
-
-import json
 import requests
 
-STRATZ_GRAPHQL_URL = "https://api.stratz.com/graphql"
-STEAM_ID = 84228471  # Your Steam32 ID
-
-# Your Stratz API token
+# 🔐 Your Stratz API token (keep private)
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiYWUyNTE3YTQtMTMwZS00MWFjLTkzMWYtMmFjNjZlMGVkMjMyIiwiU3RlYW1JZCI6Ijg0MjI4NDcxIiwibmJmIjoxNzUxODE0NjA0LCJleHAiOjE3ODMzNTA2MDQsImlhdCI6MTc1MTgxNDYwNCwiaXNzIjoiaHR0cHM6Ly9hcGkuc3RyYXR6LmNvbSJ9.fCe3q7P6VBgbPHqP-EZVjUVbU2Dk3aGufqTrjdQ3Ysw"
 
+# 🧙 Replace this with any Steam32 ID
+STEAM_ID = 84228471
+
+# 🔎 GraphQL query
 QUERY = """
-query($steamAccountId: Long!) {
-  player(steamAccountId: $steamAccountId) {
+query GetMatch($steamId: Long!) {
+  player(steamAccountId: $steamId) {
     matches(request: {take: 1}) {
       id
-      startDateTime
+      didWin
       durationSeconds
-      isRanked
-      lobbyType
+      startDateTime
       players {
         steamAccountId
+        hero { name }
         kills
         deaths
         assists
-        hero { name }
       }
     }
   }
 }
 """
 
-def fetch_data():
+def fetch_latest_match(steam_id):
+    url = "https://api.stratz.com/graphql"
     headers = {
         "Authorization": f"Bearer {TOKEN}",
         "Content-Type": "application/json",
         "User-Agent": "STRATZ_API"
     }
-
     payload = {
         "query": QUERY,
-        "variables": { "steamAccountId": STEAM_ID }
+        "variables": { "steamId": steam_id }
     }
 
-    response = requests.post(STRATZ_GRAPHQL_URL, headers=headers, json=payload)
-
+    response = requests.post(url, headers=headers, json=payload)
+    
     try:
         data = response.json()
         match = data["data"]["player"]["matches"][0]
-        print(f"🎯 Match ID: {match['id']}")
-        for player in match["players"]:
-            print(f"🧙 {player['hero']['name']} — {player['kills']}/{player['deaths']}/{player['assists']}")
+        print(f"✅ Match ID: {match['id']} — Duration: {match['durationSeconds']}s — Win: {match['didWin']}")
+        for p in match["players"]:
+            print(f"🧙 {p['hero']['name']}: {p['kills']}/{p['deaths']}/{p['assists']}")
     except Exception as e:
-        print("❌ Error parsing response:", response.text)
+        print("❌ Failed to fetch or parse match:")
+        print(response.text)
+        raise
 
-# Run the function
 if __name__ == "__main__":
-    fetch_data()
+    fetch_latest_match(STEAM_ID)
