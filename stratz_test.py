@@ -6,7 +6,7 @@ import requests
 STRATZ_GRAPHQL_URL = "https://api.stratz.com/graphql"
 STEAM_ID = 84228471  # Your Steam32 ID
 
-# Your Stratz API token (safe to use if project is private)
+# Your Stratz API token
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJTdWJqZWN0IjoiYWUyNTE3YTQtMTMwZS00MWFjLTkzMWYtMmFjNjZlMGVkMjMyIiwiU3RlYW1JZCI6Ijg0MjI4NDcxIiwibmJmIjoxNzUxODE0NjA0LCJleHAiOjE3ODMzNTA2MDQsImlhdCI6MTc1MTgxNDYwNCwiaXNzIjoiaHR0cHM6Ly9hcGkuc3RyYXR6LmNvbSJ9.fCe3q7P6VBgbPHqP-EZVjUVbU2Dk3aGufqTrjdQ3Ysw"
 
 QUERY = """
@@ -33,7 +33,8 @@ query($steamAccountId: Long!) {
 def fetch_data():
     headers = {
         "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "User-Agent": "STRATZ_API"
     }
 
     payload = {
