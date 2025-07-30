@@ -11,12 +11,13 @@ query GetMatch($steamId: Long!) {
       id
       durationSeconds
       startDateTime
-      playerSlot(steamAccountId: $steamId) {
+      players {
+        steamAccountId
+        matchResult
         hero { name }
         kills
         deaths
         assists
-        matchResult
       }
     }
   }
@@ -38,11 +39,16 @@ def fetch_latest_match(steam_id):
     try:
         data = res.json()
         match = data["data"]["player"]["matches"][0]
-        player = match["playerSlot"]
-        result = player["matchResult"]
-        win_str = "🏆 Win" if result == "Win" else "💀 Loss" if result == "Loss" else "❓ Unknown"
         print(f"✅ Match ID: {match['id']} — Duration: {match['durationSeconds']}s")
-        print(f"🧙 {player['hero']['name']}: {player['kills']}/{player['deaths']}/{player['assists']} — {win_str}")
+
+        for p in match["players"]:
+            if p["steamAccountId"] == steam_id:
+                result = p["matchResult"]
+                win_str = "🏆 Win" if result == "Win" else "💀 Loss" if result == "Loss" else "❓ Unknown"
+                print(f"🧙 {p['hero']['name']}: {p['kills']}/{p['deaths']}/{p['assists']} — {win_str}")
+                return
+
+        print("❌ Could not find player in match.")
     except Exception:
         print("❌ Error:", res.text)
 
