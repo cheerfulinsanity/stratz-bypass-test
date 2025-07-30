@@ -5,15 +5,17 @@ import os
 TOKEN = os.getenv("TOKEN")
 STEAM_ID = int(os.getenv("STEAM_ID", "84228471"))
 
+# ✅ Validated against sdl.gql schema
 QUERY = """
 query GetMatch($steamId: Long!) {
   player(steamAccountId: $steamId) {
     matches(request: {take: 1}) {
       id
-      didWin
       durationSeconds
+      startDateTime
       players {
         steamAccountId
+        matchResult
         hero { name }
         kills
         deaths
@@ -39,9 +41,12 @@ def fetch_latest_match(steam_id):
     try:
         data = res.json()
         match = data["data"]["player"]["matches"][0]
-        print(f"✅ Match ID: {match['id']} — Duration: {match['durationSeconds']}s — Win: {match['didWin']}")
+        print(f"✅ Match ID: {match['id']} — Duration: {match['durationSeconds']}s")
+
         for p in match["players"]:
-            print(f"🧙 {p['hero']['name']}: {p['kills']}/{p['deaths']}/{p['assists']}")
+            result = p["matchResult"]
+            win_str = "🏆 Win" if result == "Win" else "💀 Loss" if result == "Loss" else "❓ Unknown"
+            print(f"🧙 {p['hero']['name']}: {p['kills']}/{p['deaths']}/{p['assists']} — {win_str}")
     except Exception:
         print("❌ Error:", res.text)
 
