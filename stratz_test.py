@@ -13,7 +13,7 @@ query GetMatch($steamId: Long!) {
       startDateTime
       players {
         steamAccountId
-        matchResult
+        isVictory
         hero { name }
         kills
         deaths
@@ -43,8 +43,7 @@ def fetch_latest_match(steam_id):
 
         for p in match["players"]:
             if p["steamAccountId"] == steam_id:
-                result = p["matchResult"]
-                win_str = "🏆 Win" if result == "Win" else "💀 Loss" if result == "Loss" else "❓ Unknown"
+                win_str = "🏆 Win" if p["isVictory"] else "💀 Loss"
                 print(f"🧙 {p['hero']['name']}: {p['kills']}/{p['deaths']}/{p['assists']} — {win_str}")
                 return
 
